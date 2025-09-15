@@ -55,6 +55,22 @@ class FlowMatchingModule(lightning.LightningModule):
 
         return loss
 
+    def sample_path(self, zt, x, t, t_next, method="midpoint"):
+        t_embedding = self.t_encoder(t)
+        x_embedding = self.x_encoder(x)
+        ut = self.velocity_net(zt, x_embedding, t_embedding)
+
+        if method == "euler":
+            return zt + (t_next - t) * ut
+        elif method == "midpoint":
+            half_step = 0.5 * (t_next - t)
+            z_mid = zt + half_step * ut
+            t_mid_embedding = self.t_encoder(t + half_step)
+            u_mid = self.velocity_net(z_mid, x_embedding, t_mid_embedding)
+            return zt + (t_next - t) * u_mid
+        else:
+            raise ValueError("method should be euler or midpoint")
+
     def training_step(self, batch, batch_idx):
         return self.compute_loss(batch, batch_idx, mode="train")
 
