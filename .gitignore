@@ -1,1 +1,7 @@
 .venv
+
+scratch
+logs
+__pycache__/
+
+*.out

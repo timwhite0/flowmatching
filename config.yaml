@@ -1,0 +1,51 @@
+defaults:
+  - _self_
+  - override hydra/job_logging: disabled
+
+hydra:
+  output_subdir: null
+  run:
+    dir: .
+
+seed: 42
+
+datamodule:
+  _target_: data.CirclesDataModule
+  circles_factor: 0.4
+  circles_noise: 0.01
+  num_batches: 100
+  batch_size: 512
+  train_split: 0.8
+  val_split: 0.1
+
+flowmodule:
+  _target_: flowmatching.FlowMatchingModule
+  t_embed_dim: 8
+  z_dim: 2
+  x_embed_dim: 2
+  velo_net_channels: 128
+  lr: 1e-3
+
+trainer:
+  _target_: lightning.Trainer
+  max_epochs: 200
+  accelerator: gpu
+  devices: 1
+  logger:
+    _target_: lightning.pytorch.loggers.TensorBoardLogger
+    save_dir: logs
+    name: ${now:%Y-%m-%d_%H-%M}
+    version: ""
+  callbacks:
+    - _target_: lightning.pytorch.callbacks.EarlyStopping
+      monitor: val_loss
+      patience: 50
+      mode: min
+      verbose: true
+    - _target_: lightning.pytorch.callbacks.ModelCheckpoint
+      monitor: val_loss
+      mode: min
+      save_top_k: 1
+      filename: "velocitynet_epoch{epoch}"
+      auto_insert_metric_name: false
+      verbose: true

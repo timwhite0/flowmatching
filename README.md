@@ -1,2 +1,1 @@
-# flowmatching
-Flow matching.
+# Conditional flow matching with PyTorch Lightning
