@@ -1,8 +1,7 @@
 import lightning
 import torch
+from networks import VelocityNet, tEncoder, xEncoder
 from torch import nn, optim
-
-from nets import VelocityNet, tEncoder, xEncoder
 
 
 class FlowMatchingModule(lightning.LightningModule):
