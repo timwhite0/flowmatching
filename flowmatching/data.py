@@ -4,32 +4,25 @@ from torch import Tensor
 from torch.utils.data import DataLoader, TensorDataset, random_split
 
 
-class CirclesDataModule(lightning.LightningDataModule):
+class DataModule(lightning.LightningDataModule):
     def __init__(
         self,
-        circles_factor: float,
-        circles_noise: float,
         num_batches: int,
         batch_size: int,
         train_split: float,
         val_split: float,
     ):
         super().__init__()
-        self.circles_factor = circles_factor
-        self.circles_noise = circles_noise
         self.num_batches = num_batches
         self.batch_size = batch_size
         self.train_split = train_split
         self.val_split = val_split
 
-    def setup(self, stage: str):
-        z, x = make_circles(
-            n_samples=self.num_batches * self.batch_size,
-            factor=self.circles_factor,
-            noise=self.circles_noise,
-        )
+    def generate_dataset(self):
+        pass
 
-        dataset = TensorDataset(Tensor(z), Tensor(x).unsqueeze(-1))
+    def setup(self, stage: str):
+        dataset = self.generate_dataset()
 
         size_total = len(dataset)
         size_train = int(self.train_split * size_total)
@@ -60,3 +53,19 @@ class CirclesDataModule(lightning.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
         )
+
+
+class CirclesDataModule(DataModule):
+    def __init__(self, circles_factor: float, circles_noise: float, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.circles_factor = circles_factor
+        self.circles_noise = circles_noise
+
+    def generate_dataset(self):
+        z, x = make_circles(
+            n_samples=self.num_batches * self.batch_size,
+            factor=self.circles_factor,
+            noise=self.circles_noise,
+        )
+        return TensorDataset(Tensor(z), Tensor(x).unsqueeze(-1))
