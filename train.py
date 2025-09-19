@@ -4,7 +4,7 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 
-@hydra.main(version_base=None, config_path=".", config_name="config")
+@hydra.main(version_base=None)
 def main(cfg: DictConfig):
     lightning.seed_everything(cfg.seed)
 
